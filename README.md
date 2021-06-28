@@ -11,6 +11,12 @@ record by removing old items from the shopping history, and assigning a targetin
 While that, of course, merely describes some arbitrary business logic, Data Pipe helps you to describe this process with a set of reusable, composable, and
 encapsulated steps!
 
+Preface
+-------
+Please note that this package is still **under active development** and **NOT ready** to be used in production environments yet. We're still building our own
+workflow on top of data-pipe, so everything is subject to change until the 1.0 release. If you're interested in shaping the future of this library, you're very
+welcome to jump in!
+
 Installation
 ------------
 Install the library as a dependency using composer:
