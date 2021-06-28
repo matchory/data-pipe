@@ -1,6 +1,6 @@
-Data Pipe
+Data Pipe [![Latest Stable Version](http://poser.pugx.org/matchory/data-pipe/v)](https://packagist.org/packages/matchory/data-pipe) [![Total Downloads](http://poser.pugx.org/matchory/data-pipe/downloads)](https://packagist.org/packages/matchory/data-pipe) [![Latest Unstable Version](http://poser.pugx.org/matchory/data-pipe/v/unstable)](https://packagist.org/packages/matchory/data-pipe) [![License](http://poser.pugx.org/matchory/data-pipe/license)](https://packagist.org/packages/matchory/data-pipe)
 =========
-> Data Enrichment Pipeline implementation in PHP
+> An opinionated framework for building data enrichment pipelines in PHP
 
 Data Pipe is a framework to create data enrichment pipelines in PHP. Such an application works by taking a piece of information, enriching it with additional
 data, and enhancing that data by applying transformations on them.
