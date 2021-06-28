@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        autoconfigure: true
+        autowire: true
+        bind:
+
+            # Ensure we get the framework dispatcher
+            Psr\EventDispatcher\EventDispatcherInterface: '@event_dispatcher'
+
+    # Pipeline registry: Sorts nodes and prepares the pipeline
+    matchory.pipeline.registry:
+        class: 'Matchory\DataPipe\PipelineRegistry'
+        arguments:
+            - '!tagged_iterator matchory.pipeline.node'
+
+    # Pipeline instance: Requires sorted nodes from the registry
+    matchory.pipeline:
+        class: 'Matchory\DataPipe\Pipeline'
+        factory:
+            - '@Matchory\DataPipe\Factories\PipelineFactory'
+            - 'createPipeline'
+
+    # Pipeline: Class alias to make it injectable
+    Matchory\DataPipe\Pipeline:
+        alias: 'matchory.pipeline'
+
+    # Verbatim classes to inject
+    Matchory\DataPipe\PipelineRegistry: ~
+    Matchory\DataPipe\Factories\PipelineFactory: ~
+    Matchory\DataPipe\DependencyGraph\DependencyGraph: ~

@@ -1,0 +1,44 @@
+{
+    "name": "matchory/data-pipe",
+    "description": "A data processing pipeline framework",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Matchory\\DataPipe\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Matchory\\DataPipe\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Moritz Friedrich",
+            "email": "moritz@matchory.com"
+        }
+    ],
+    "require": {
+        "php": ">8",
+        "marcj/topsort": "^2.0",
+        "phpunit/phpunit": "^9.5",
+        "psr/event-dispatcher": "^1.0",
+        "ramsey/collection": "^1.1",
+        "symfony/event-dispatcher": "^5.3"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check": "psalm --config=./psalm.xml"
+    },
+    "require-dev": {
+        "illuminate/contracts": "^8.48",
+        "illuminate/support": "^8.48",
+        "jetbrains/phpstorm-attributes": "^1.0",
+        "symfony/framework-bundle": "^5.3",
+        "vimeo/psalm": "^4.7"
+    }
+}
