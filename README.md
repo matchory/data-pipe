@@ -32,7 +32,8 @@ irrelevant, but it allows lots of runtime-optimizations.
 ### Creating nodes
 In its simplest form, an enriching node might look like this:
 ```php
-use Matchory\DataPipe\Nodes\AbstractCollector as Node;use Matchory\DataPipe\PipelineContext;
+use Matchory\DataPipe\Nodes\AbstractCollector as Node;
+use Matchory\DataPipe\PipelineContext;
 
 class MyNode extends Node
 {
@@ -64,7 +65,9 @@ Data Pipe provides a simple algorithm for
 ### Creating pipelines
 Now that we have a node, let's create a pipeline to add it to:
 ```php
-use Matchory\DataPipe\Payload\Payload;use Matchory\DataPipe\Pipeline;use Symfony\Component\EventDispatcher\EventDispatcher;
+use Matchory\DataPipe\Payload\Payload;
+use Matchory\DataPipe\Pipeline;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 $nodes = [
     new MyNode(),
