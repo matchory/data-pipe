@@ -110,8 +110,31 @@ class Pipeline
         }
 
         if ($node instanceof CollectorInterface) {
+            try {
+                $cost = $node->getCost();
+            } catch (Throwable $exception) {
+                $event = new NodeFailedEvent(
+                    $exception,
+                    $node,
+                    $context,
+                    0
+                );
+
+                /** @var NodeFailedEvent $event */
+                $event = $this->dispatcher->dispatch($event);
+
+                // If an event listener advises to continue regardless of the
+                // error, we continue. Otherwise, we'll throw the exception,
+                // probably crashing the process (on purpose!).
+                if ($event->shouldSkip()) {
+                    return $context;
+                }
+
+                throw $exception;
+            }
+
             // If the source is too expensive, we skip it
-            if ($maximumCost && $node->getCost() > $maximumCost) {
+            if ($maximumCost && $cost > $maximumCost) {
                 $event = new NodeTooExpensiveEvent(
                     $node,
                     $context,
@@ -134,7 +157,7 @@ class Pipeline
             // we're still missing, querying it would be redundant. Unless an
             // event listener advises to query it regardless, we skip it.
             if (
-                $node->getCost() > 0 &&
+                $cost > 0 &&
                 ! $this->providesMissingFields($node, $context)
             ) {
                 $event = new NodeRedundantEvent(
