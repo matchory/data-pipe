@@ -14,13 +14,13 @@ declare(strict_types=1);
 
 namespace Matchory\DataPipe\Integration\Symfony\Command;
 
+use DusanKasan\Knapsack\Collection;
 use Matchory\DataPipe\Exceptions\DependencyGraph\CircularDependencyException;
 use Matchory\DataPipe\Exceptions\DependencyGraph\DependencyNotFoundException;
 use Matchory\DataPipe\Interfaces\CollectorInterface as Collector;
 use Matchory\DataPipe\Interfaces\PipelineNodeInterface as Node;
 use Matchory\DataPipe\Interfaces\TransformerInterface as Transformer;
 use Matchory\DataPipe\PipelineRegistry;
-use Ramsey\Collection\Collection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Helper\Table;
@@ -86,10 +86,7 @@ class DebugPipelineCommand extends Command
         InputInterface $input,
         OutputInterface $output
     ): int {
-        $nodes = new Collection(
-            'mixed',
-            $this->registry->resolvePipeline()
-        );
+        $nodes = Collection::from($this->registry->resolvePipeline());
 
         $io = new SymfonyStyle($input, $output);
         $table = new Table($io);

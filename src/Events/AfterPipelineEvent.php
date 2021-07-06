@@ -4,30 +4,34 @@ declare(strict_types=1);
 
 namespace Matchory\DataPipe\Events;
 
+use DusanKasan\Knapsack\Collection;
 use Iterator;
 use JetBrains\PhpStorm\Pure;
+use Matchory\DataPipe\Interfaces\PayloadInterface;
 use Matchory\DataPipe\Interfaces\PipelineNodeInterface;
-use Matchory\DataPipe\PayloadCollection;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 class AfterPipelineEvent extends GenericEvent
 {
     /**
-     * @param Iterator                $originalPayloads
-     * @param PayloadCollection       $updatedPayloads
-     * @param PipelineNodeInterface[] $nodes
-     * @param int|null                $maximumCost
+     * @param Iterator<PayloadInterface> $originalPayloads
+     * @param Collection                 $updatedPayloads
+     * @param PipelineNodeInterface[]    $nodes
+     * @param int|null                   $maximumCost
      */
     #[Pure]
     public function __construct(
         protected Iterator $originalPayloads,
-        protected PayloadCollection $updatedPayloads,
+        protected Collection $updatedPayloads,
         protected array $nodes,
         protected int|null $maximumCost = null
     ) {
         parent::__construct($updatedPayloads);
     }
 
+    /**
+     * @return Iterator<PayloadInterface>
+     */
     #[Pure]
     public function getOriginalPayloads(): Iterator
     {
@@ -35,7 +39,7 @@ class AfterPipelineEvent extends GenericEvent
     }
 
     #[Pure]
-    public function getUpdatedPayloads(): PayloadCollection
+    public function getUpdatedPayloads(): Collection
     {
         return $this->updatedPayloads;
     }

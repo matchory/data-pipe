@@ -19,7 +19,6 @@ use Matchory\DataPipe\Pipeline;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Collection\Exception\OutOfBoundsException;
 use SebastianBergmann\RecursionContext\InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Throwable;
@@ -30,7 +29,6 @@ class PipelineTest extends TestCase
      * @throws Throwable
      * @throws Exception
      * @throws ExpectationFailedException
-     * @throws OutOfBoundsException
      * @throws InvalidArgumentException
      * @covers \Matchory\DataPipe\Pipeline
      */

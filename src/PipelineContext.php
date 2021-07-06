@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Matchory\DataPipe;
 
+use DusanKasan\Knapsack\Exceptions\InvalidArgument;
+use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
+use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use Matchory\DataPipe\Changes\ProposedChange;
 use Matchory\DataPipe\Changes\ProposedChangeCollection;
 use Matchory\DataPipe\Interfaces\PayloadInterface;
 use Matchory\DataPipe\Interfaces\PipelineNodeInterface;
 use Matchory\DataPipe\Interfaces\ProposedChangeInterface;
-use Ramsey\Collection\Exception\OutOfBoundsException;
 
 /**
  * Pipeline Context
@@ -25,10 +27,14 @@ final class PipelineContext
 
     protected PipelineNodeInterface|null $node = null;
 
+    /**
+     * @throws InvalidReturnValue
+     * @throws InvalidArgument
+     */
     public function __construct(
         protected PayloadInterface $payload
     ) {
-        $this->proposedChanges = new ProposedChangeCollection();
+        $this->proposedChanges = new ProposedChangeCollection([]);
     }
 
     /**
@@ -46,20 +52,9 @@ final class PipelineContext
 
     public function commit(): PayloadInterface
     {
-        $payload = clone $this->payload;
-        $payload = $this
+        return $this
             ->getProposedChanges()
-            ->reduce(
-                fn(
-                    PayloadInterface $payload,
-                    ProposedChangeInterface $change
-                ) => $change->apply($payload),
-                $payload
-            );
-
-        $this->proposedChanges->clear();
-
-        return $payload;
+            ->apply($this->getPayload());
     }
 
     /**
@@ -83,7 +78,7 @@ final class PipelineContext
                 continue;
             }
 
-            if (count($this->getProposedChangesToField($name)) > 0) {
+            if ($this->getProposedChangesToField($name)->isNotEmpty()) {
                 continue;
             }
 
@@ -100,7 +95,7 @@ final class PipelineContext
      * @param string $field Name of the field to retrieve
      *
      * @return mixed Value if found, null otherwise.
-     * @throws OutOfBoundsException
+     * @throws ItemNotFound
      */
     public function getMostTrustedValueForField(string $field): mixed
     {
@@ -108,14 +103,17 @@ final class PipelineContext
 
         // If there are no proposed changes for this field, return the payload
         // attribute. This will be null if the field is not set or unknown.
-        if ($proposedChanges->count() === 0) {
+        if ($proposedChanges->isEmpty()) {
             return $this->payload->getAttribute($field);
         }
 
         return $proposedChanges
 
             // Sort the changes ascending by confidence
-            ->sort('getConfidence')
+            ->sort(fn(
+                ProposedChangeInterface $a,
+                ProposedChangeInterface $b
+            ) => $a->getConfidence() <=> $b->getConfidence())
 
             // Retrieve the change with the highest confidence
             ->last()
@@ -188,7 +186,7 @@ final class PipelineContext
         /** @var PipelineNodeInterface $node */
         $node = $this->node;
 
-        $this->proposedChanges->add(new ProposedChange(
+        $this->proposedChanges->append(new ProposedChange(
             $node,
             $field,
             $value,

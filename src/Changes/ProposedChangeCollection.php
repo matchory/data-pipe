@@ -14,17 +14,29 @@ declare(strict_types=1);
 
 namespace Matchory\DataPipe\Changes;
 
-use Matchory\DataPipe\AbstractCollection;
+use DusanKasan\Knapsack\Collection;
+use Matchory\DataPipe\Interfaces\PayloadInterface;
 use Matchory\DataPipe\Interfaces\ProposedChangeInterface;
 
 /**
- * @template-extends AbstractCollection<ProposedChangeInterface>
+ * @method ProposedChangeInterface last(bool $convertToCollection = false)
+ * @method self filter(callable|null $function = null)
+ * @method self sort(callable $function)
+ * @method self values()
+ * @method ProposedChangeInterface[] toArray()
  */
-class ProposedChangeCollection extends AbstractCollection
+class ProposedChangeCollection extends Collection
 {
-    public function getType(): string
+    /**
+     * Clears the collection.
+     *
+     * @return $this
+     */
+    public function clear(): static
     {
-        return ProposedChangeInterface::class;
+        $this->drop($this->size());
+
+        return $this;
     }
 
     /**
@@ -38,7 +50,7 @@ class ProposedChangeCollection extends AbstractCollection
         /** @var array<string, ProposedChangeInterface> $changes */
         $changes = [];
 
-        foreach ($this->data as $change) {
+        foreach ($this->toArray() as $change) {
             $field = $change->getField();
 
             // Keep the existing change if its confidence is higher, or override
@@ -54,5 +66,22 @@ class ProposedChangeCollection extends AbstractCollection
         }
 
         return $changes;
+    }
+
+    public function apply(PayloadInterface $payload): PayloadInterface
+    {
+        $payload = clone $payload;
+
+        $this->reduce(
+            fn(
+                PayloadInterface $payload,
+                ProposedChangeInterface $change
+            ) => $change->apply($payload),
+            $payload
+        );
+
+        $this->clear();
+
+        return $payload;
     }
 }
