@@ -1,0 +1,9 @@
+services:
+  _defaults:
+    autoconfigure: true
+    autowire: true
+
+  matchory.pipeline.commands.debug_pipeline:
+    class: Matchory\DataPipe\Integration\Symfony\Command\DebugPipelineCommand
+    tags:
+      - { name: console.command, command: 'debug:pipeline' }

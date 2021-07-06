@@ -42,6 +42,7 @@ class DataPipeExtension extends ConfigurableExtension
         );
 
         $loader->load('services.yaml');
+        $loader->load('commands.yaml');
 
         #$definition = $container->getDefinition('matchory.pipeline.registry');
         #$definition = $container->getDefinition('matchory.pipeline.twitter_client');
