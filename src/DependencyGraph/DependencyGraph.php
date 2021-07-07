@@ -13,6 +13,7 @@ use MJS\TopSort\Implementations\FixedArraySort;
 use MJS\TopSort\TopSortInterface;
 
 use function array_map;
+use function count;
 
 /**
  * Dependency Graph
@@ -57,11 +58,11 @@ class DependencyGraph
     public function connect(PNode $node): void
     {
         // Store a reference to the node, so we can retrieve it from its ID
-        $this->nodes[(string)$node] = $node;
+        $this->nodes[$node::class] = $node;
 
         // Add the node and its dependencies to the graph
         $this->graph->add(
-            (string)$node,
+            $node::class,
             $node->getDependencies()
         );
     }
@@ -91,11 +92,11 @@ class DependencyGraph
             ));
         } catch (ElementNotFoundException $exception) {
             $dependency = $exception->getTarget();
-            $requiredBy = $exception->getSource();
+            $requiredBy = $this->nodes[$exception->getSource()];
 
             throw new DependencyNotFoundException(
-                $this->nodes[$dependency],
-                $this->nodes[$requiredBy]
+                $dependency,
+                $this->nodes[$requiredBy::class]
             );
         }
     }

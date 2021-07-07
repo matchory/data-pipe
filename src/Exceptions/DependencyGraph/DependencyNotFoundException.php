@@ -8,36 +8,31 @@ use InvalidArgumentException;
 use JetBrains\PhpStorm\Pure;
 use Matchory\DataPipe\Interfaces\PipelineNodeInterface;
 
+use function sprintf;
+
 class DependencyNotFoundException extends InvalidArgumentException
 {
-    protected PipelineNodeInterface $dependency;
-
-    protected PipelineNodeInterface $requiredBy;
-
     #[Pure]
     public function __construct(
-        PipelineNodeInterface $dependency,
-        PipelineNodeInterface $requiredBy
+        protected string $dependency,
+        protected PipelineNodeInterface $node
     ) {
-        $this->dependency = $dependency;
-        $this->requiredBy = $requiredBy;
-
         parent::__construct(sprintf(
             "Dependency '%s' not found, required by '%s'",
-            (string)$dependency,
-            (string)$requiredBy
+            $dependency,
+            $node::class
         ));
     }
 
     #[Pure]
-    public function getDependency(): PipelineNodeInterface
+    public function getDependency(): string
     {
         return $this->dependency;
     }
 
     #[Pure]
-    public function getRequiredBy(): PipelineNodeInterface
+    public function getNode(): PipelineNodeInterface
     {
-        return $this->requiredBy;
+        return $this->node;
     }
 }
