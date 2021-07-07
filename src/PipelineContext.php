@@ -6,12 +6,13 @@ namespace Matchory\DataPipe;
 
 use DusanKasan\Knapsack\Exceptions\InvalidArgument;
 use DusanKasan\Knapsack\Exceptions\InvalidReturnValue;
-use DusanKasan\Knapsack\Exceptions\ItemNotFound;
 use Matchory\DataPipe\Changes\ProposedChange;
 use Matchory\DataPipe\Changes\ProposedChangeCollection;
 use Matchory\DataPipe\Interfaces\PayloadInterface;
 use Matchory\DataPipe\Interfaces\PipelineNodeInterface;
 use Matchory\DataPipe\Interfaces\ProposedChangeInterface;
+
+use function assert;
 
 /**
  * Pipeline Context
@@ -30,6 +31,7 @@ final class PipelineContext
     /**
      * @throws InvalidReturnValue
      * @throws InvalidArgument
+     * @internal
      */
     public function __construct(
         protected PayloadInterface $payload
@@ -50,6 +52,11 @@ final class PipelineContext
         return $context;
     }
 
+    /**
+     * Commits the context changes on the payload.
+     *
+     * @return PayloadInterface
+     */
     public function commit(): PayloadInterface
     {
         return $this
@@ -95,7 +102,8 @@ final class PipelineContext
      * @param string $field Name of the field to retrieve
      *
      * @return mixed Value if found, null otherwise.
-     * @throws ItemNotFound
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public function getMostTrustedValueForField(string $field): mixed
     {
@@ -156,11 +164,9 @@ final class PipelineContext
     public function getProposedChangesToField(
         string $field
     ): ProposedChangeCollection {
-        $changes = $this->proposedChanges->filter(static fn(
+        return $this->proposedChanges->filter(static fn(
             ProposedChangeInterface $change
         ): bool => $change->getField() === $field);
-
-        return new ProposedChangeCollection($changes);
     }
 
     /**
@@ -172,29 +178,30 @@ final class PipelineContext
      * To improve upon an existing proposed change, a node might add up all
      * existing confidence levels to ensure its value takes precedence.
      *
-     * @param string $field      Name of the field to be updated. Note that this
-     *                           MUST be a field resolvable in the payload
-     *                           itself, otherwise the proposal will
+     * @param string $attribute  Name of the attribute to be updated. Note that
+     *                           this MUST be an attribute resolvable in the
+     *                           payload itself, otherwise the proposal will
      *                           be discarded.
-     * @param mixed  $value      Proposed, changed field value.
+     * @param mixed  $value      Proposed, updated attribute value.
      * @param int    $confidence Level of confidence the node self-assessed for
      *                           this proposal. This value has no lower or upper
      *                           bounds but must be set according to other
      *                           pipeline nodes in the application.
      */
     public function proposeChange(
-        string $field,
+        string $attribute,
         mixed $value,
         int $confidence = 0
     ): void {
-        /** @var PipelineNodeInterface $node */
-        $node = $this->node;
+        // The assertion cannot fail at this point: Every context is created
+        // with a node scope before the application can propose changes.
+        assert($this->node instanceof PipelineNodeInterface);
 
-        $this->proposedChanges->append(new ProposedChange(
-            $node,
-            $field,
+        $this->proposedChanges = $this->proposedChanges->add(new ProposedChange(
+            $this->node,
+            $attribute,
             $value,
-            $this->payload->{$field} ?? null,
+            $this->payload->getAttribute($attribute),
             $confidence
         ));
     }

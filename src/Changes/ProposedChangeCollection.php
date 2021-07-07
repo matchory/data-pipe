@@ -8,11 +8,12 @@ use DusanKasan\Knapsack\Collection;
 use Matchory\DataPipe\Interfaces\PayloadInterface;
 use Matchory\DataPipe\Interfaces\ProposedChangeInterface;
 
+use function DusanKasan\Knapsack\append;
+use function DusanKasan\Knapsack\filter;
+use function DusanKasan\Knapsack\sort;
+
 /**
  * @method ProposedChangeInterface last(bool $convertToCollection = false)
- * @method self filter(callable|null $function = null)
- * @method self sort(callable $function)
- * @method self values()
  * @method ProposedChangeInterface[] toArray()
  */
 class ProposedChangeCollection extends Collection
@@ -73,5 +74,46 @@ class ProposedChangeCollection extends Collection
         $this->clear();
 
         return $payload;
+    }
+
+    /**
+     * Adds a proposed change to the collection.
+     *
+     * @param mixed $value
+     *
+     * @return ProposedChangeCollection
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpDocMissingThrowsInspection
+     */
+    public function add(ProposedChangeInterface $value): ProposedChangeCollection
+    {
+        $collection = append($this->getItems(), $value);
+
+        return new self($collection->getItems());
+    }
+
+    /**
+     * @inheritdoc
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpDocMissingThrowsInspection
+     */
+    public function filter(
+        callable|null $function = null
+    ): ProposedChangeCollection {
+        $collection = filter($this->getItems(), $function);
+
+        return new self($collection);
+    }
+
+    /**
+     * @inheritdoc
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpDocMissingThrowsInspection
+     */
+    public function sort(callable $function): ProposedChangeCollection
+    {
+        $collection = sort($this->getItems(), $function);
+
+        return new self($collection);
     }
 }
