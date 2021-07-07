@@ -150,13 +150,17 @@ final class PipelineContext
      * @param string $field
      *
      * @return ProposedChangeCollection
+     * @noinspection PhpUnhandledExceptionInspection
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public function getProposedChangesToField(
         string $field
     ): ProposedChangeCollection {
-        return $this->proposedChanges->filter(static fn(
+        $changes = $this->proposedChanges->filter(static fn(
             ProposedChangeInterface $change
         ): bool => $change->getField() === $field);
+
+        return new ProposedChangeCollection($changes);
     }
 
     /**

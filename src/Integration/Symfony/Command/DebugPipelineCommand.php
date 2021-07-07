@@ -1,15 +1,5 @@
 <?php
 
-/**
- * This file is part of matchory-pipeline, a Matchory application.
- *
- * Unauthorized copying of this file, via any medium, is strictly prohibited.
- * Its contents are strictly confidential and proprietary.
- *
- * @copyright 2020–2021 Matchory GmbH · All rights reserved
- * @author    Moritz Friedrich <moritz@matchory.com>
- */
-
 declare(strict_types=1);
 
 namespace Matchory\DataPipe\Integration\Symfony\Command;
@@ -102,17 +92,17 @@ class DebugPipelineCommand extends Command
             return self::INVALID;
         }
 
-        $table
-            ->setHeaderTitle('Collectors')
-            ->setHeaders([
-                '#',
-                'Node',
-                'Type',
-                'Cost',
-                'Provides Fields',
-                'Depends on',
-            ])
-            ->setRows($nodes
+        $table->setHeaders([
+            '#',
+            'Node',
+            'Type',
+            'Cost',
+            'Provides Fields',
+            'Depends on',
+        ]);
+
+        $table->setRows(
+            $nodes
                 ->filter(fn(Node $node) => (
                     ( ! $onlyCollectors && ! $onlyTransformers) ||
                     ($onlyCollectors && $node instanceof Collector) ||
@@ -128,8 +118,10 @@ class DebugPipelineCommand extends Command
                         : '--',
                     implode(', ', $node->getDependencies()) ?: '--',
                 ])
-                ->toArray())
-            ->render();
+                ->toArray()
+        );
+
+        $table->render();
 
         return self::SUCCESS;
     }
