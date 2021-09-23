@@ -16,14 +16,14 @@ interface CollectorInterface extends PipelineNodeInterface
     public function getCost(): int;
 
     /**
-     * Lists all fields provided by this data source. This is important during
+     * Lists all attributes provided by this data source. This is important during
      * determining the cost: A more expensive data source will only be invoked
-     * if it provides fields not yet present in the intermediate representation,
-     * and all other, less expensive sources providing those fields have been
-     * queried already.
-     * Fields themselves have a maximum justifiable cost to acquire them.
+     * if it provides attributes not yet present in the intermediate
+     * representation, and all other, less expensive sources providing those
+     * attributes have been queried already.
+     * Attributes themselves have a maximum justifiable cost to acquire them.
      *
      * @return string[]
      */
-    public function getProvidedFields(): array;
+    public function getProvidedAttributes(): array;
 }

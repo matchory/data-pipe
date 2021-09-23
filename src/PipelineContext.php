@@ -13,6 +13,7 @@ use Matchory\DataPipe\Interfaces\PipelineNodeInterface;
 use Matchory\DataPipe\Interfaces\ProposedChangeInterface;
 
 use function assert;
+use function ceil;
 
 /**
  * Pipeline Context
@@ -24,9 +25,9 @@ use function assert;
  */
 final class PipelineContext
 {
-    protected ProposedChangeCollection $proposedChanges;
-
     protected PipelineNodeInterface|null $node = null;
+
+    protected ProposedChangeCollection $proposedChanges;
 
     /**
      * @throws InvalidReturnValue
@@ -37,6 +38,18 @@ final class PipelineContext
         protected PayloadInterface $payload
     ) {
         $this->proposedChanges = new ProposedChangeCollection([]);
+    }
+
+    /**
+     * Commits the context changes on the payload.
+     *
+     * @return PayloadInterface
+     */
+    public function commit(): PayloadInterface
+    {
+        return $this
+            ->getProposedChanges()
+            ->apply($this->getPayload());
     }
 
     /**
@@ -53,31 +66,18 @@ final class PipelineContext
     }
 
     /**
-     * Commits the context changes on the payload.
-     *
-     * @return PayloadInterface
-     */
-    public function commit(): PayloadInterface
-    {
-        return $this
-            ->getProposedChanges()
-            ->apply($this->getPayload());
-    }
-
-    /**
-     * Retrieves all fields missing from the payload at the current point in
-     * pipeline processing time. This method must return a list of field names
-     * as they occur in the payload itself.
+     * Retrieves all attributes missing from the payload at the current point in
+     * pipeline processing time. This method must return a list of attribute
+     * names as they occur in the payload itself.
      *
      * @return string[]
      */
-    public function getMissingFields(): array
+    public function getMissingAttributes(): array
     {
-        $fieldNames = $this->payload->getAllAttributeNames();
+        $attributeNames = $this->payload->getAllAttributeNames();
+        $attributes = [];
 
-        $fields = [];
-
-        foreach ($fieldNames as $name) {
+        foreach ($attributeNames as $name) {
             /** @psalm-var mixed $value */
             $value = $this->payload->getAttribute($name);
 
@@ -85,34 +85,35 @@ final class PipelineContext
                 continue;
             }
 
-            if ($this->getProposedChangesToField($name)->isNotEmpty()) {
+            if ($this->getProposedChangesToAttribute($name)->isNotEmpty()) {
                 continue;
             }
 
-            $fields[] = $name;
+            $attributes[] = $name;
         }
 
-        return $fields;
+        return $attributes;
     }
 
     /**
-     * Retrieves the most trusted value for a field. This may include both the
+     * Retrieves the most trusted value for an attribute. This may include both the
      * payload value or any proposed changes.
      *
-     * @param string $field Name of the field to retrieve
+     * @param string $attribute Name of the attribute to retrieve
      *
      * @return mixed Value if found, null otherwise.
      * @noinspection PhpUnhandledExceptionInspection
      * @noinspection PhpDocMissingThrowsInspection
      */
-    public function getMostTrustedValueForField(string $field): mixed
+    public function getMostTrustedValueForAttribute(string $attribute): mixed
     {
-        $proposedChanges = $this->getProposedChangesToField($field);
+        $proposedChanges = $this->getProposedChangesToAttribute($attribute);
 
-        // If there are no proposed changes for this field, return the payload
-        // attribute. This will be null if the field is not set or unknown.
+        // If there are no proposed changes for this attribute, return the
+        // unmodified value from the payload itself. This will be null if the
+        // attribute is not set or unknown.
         if ($proposedChanges->isEmpty()) {
-            return $this->payload->getAttribute($field);
+            return $this->payload->getAttribute($attribute);
         }
 
         return $proposedChanges
@@ -153,27 +154,27 @@ final class PipelineContext
     }
 
     /**
-     * Retrieves all proposed changes to a given field.
+     * Retrieves all proposed changes to a given attribute.
      *
-     * @param string $field
+     * @param string $attribute
      *
      * @return ProposedChangeCollection
      * @noinspection PhpUnhandledExceptionInspection
      * @noinspection PhpDocMissingThrowsInspection
      */
-    public function getProposedChangesToField(
-        string $field
+    public function getProposedChangesToAttribute(
+        string $attribute
     ): ProposedChangeCollection {
         return $this->proposedChanges->filter(static fn(
             ProposedChangeInterface $change
-        ): bool => $change->getField() === $field);
+        ): bool => $change->getAttribute() === $attribute);
     }
 
     /**
-     * Proposes a change to the payload data. A change consists of a field to be
-     * changed, its new value, and a self-assessed level of confidence the node
-     * attaches to this change proposal. Depending on how the value has been
-     * derived, a node might assign a lower confidence if there's reason to
+     * Proposes a change to the payload data. A change consists of an attribute
+     * to be changed, its new value, and a self-assessed level of confidence the
+     * node attaches to this change proposal. Depending on how the value has
+     * been derived, a node might assign a lower confidence if there's reason to
      * believe another node might be able to obtain a better value.
      * To improve upon an existing proposed change, a node might add up all
      * existing confidence levels to ensure its value takes precedence.

@@ -9,28 +9,48 @@ use Matchory\DataPipe\Interfaces\PayloadInterface;
 use Matchory\DataPipe\Interfaces\PipelineNodeInterface;
 use Matchory\DataPipe\Interfaces\ProposedChangeInterface;
 
+/**
+ * ProposedChange
+ *
+ * @template T
+ * @implements ProposedChangeInterface<T>
+ * @bundle   Matchory\DataPipe\Changes
+ */
 final class ProposedChange implements ProposedChangeInterface
 {
-    private mixed $oldValue;
+    private string $attribute;
 
     private int $confidence;
 
-    private PipelineNodeInterface $node;
-
-    private string $field;
-
+    /**
+     * @var T|null
+     */
     private mixed $newValue;
 
+    private PipelineNodeInterface $node;
+
+    /**
+     * @var T|null
+     */
+    private mixed $oldValue;
+
+    /**
+     * @param PipelineNodeInterface $node
+     * @param string                $attribute
+     * @param T                     $newValue
+     * @param T|null                $oldValue
+     * @param int                   $confidence
+     */
     #[Pure]
     public function __construct(
         PipelineNodeInterface $node,
-        string $field,
+        string $attribute,
         mixed $newValue,
         mixed $oldValue = null,
         int $confidence = 0
     ) {
         $this->node = $node;
-        $this->field = $field;
+        $this->attribute = $attribute;
         $this->newValue = $newValue;
         $this->oldValue = $oldValue;
         $this->confidence = $confidence;
@@ -42,11 +62,17 @@ final class ProposedChange implements ProposedChangeInterface
     public function apply(PayloadInterface $payload): PayloadInterface
     {
         $payload->setAttribute(
-            $this->getField(),
+            $this->getAttribute(),
             $this->getNewValue()
         );
 
         return $payload;
+    }
+
+    #[Pure]
+    public function getAttribute(): string
+    {
+        return $this->attribute;
     }
 
     #[Pure]
@@ -55,12 +81,9 @@ final class ProposedChange implements ProposedChangeInterface
         return $this->confidence;
     }
 
-    #[Pure]
-    public function getField(): string
-    {
-        return $this->field;
-    }
-
+    /**
+     * @return T
+     */
     #[Pure]
     public function getNewValue(): mixed
     {
@@ -73,6 +96,9 @@ final class ProposedChange implements ProposedChangeInterface
         return $this->node;
     }
 
+    /**
+     * @return T
+     */
     #[Pure]
     public function getOldValue(): mixed
     {

@@ -32,7 +32,7 @@ class ProposedChangeCollection extends Collection
 
     /**
      * Resolves proposed changes in a context to the single proposal with
-     * the highest confidence level for each field.
+     * the highest confidence level for each attribute.
      *
      * @return array<string, ProposedChangeInterface>
      */
@@ -42,18 +42,18 @@ class ProposedChangeCollection extends Collection
         $changes = [];
 
         foreach ($this->toArray() as $change) {
-            $field = $change->getField();
+            $attribute = $change->getAttribute();
 
             // Keep the existing change if its confidence is higher, or override
             // it with the new change
             if (
-                isset($changes[$field]) &&
-                $changes[$field]->getConfidence() > $change->getConfidence()
+                isset($changes[$attribute]) &&
+                $changes[$attribute]->getConfidence() > $change->getConfidence()
             ) {
                 continue;
             }
 
-            $changes[$field] = $change;
+            $changes[$attribute] = $change;
         }
 
         return $changes;

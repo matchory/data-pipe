@@ -19,7 +19,7 @@ abstract class AbstractTransformer extends AbstractPipelineNode implements Trans
         $className = array_pop($segments);
 
         return str_ireplace(
-            'PostProcessingNode',
+            'Transformer',
             '',
             $className
         );

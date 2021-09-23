@@ -153,13 +153,14 @@ class Pipeline
                 }
             }
 
-            // If this is an expensive source, and it doesn't provide any fields
-            // we're still missing, querying it would be redundant. Unless an
-            // event listener advises to query it regardless, we skip it.
-            if (
-                $cost > 0 &&
-                ! $this->providesMissingFields($node, $context)
-            ) {
+            // If this is an expensive source, and it doesn't provide any
+            // attributes we're still lacking, querying it would be redundant.
+            // Unless an event listener advises to query it regardless,
+            // we skip it.
+            if ($cost > 0 && ! $this->providesMissingAttributes(
+                    $node,
+                    $context
+                )) {
                 $event = new NodeRedundantEvent(
                     $node,
                     $context
@@ -284,12 +285,12 @@ class Pipeline
         return $payload;
     }
 
-    protected function providesMissingFields(
+    protected function providesMissingAttributes(
         CollectorInterface $source,
         PipelineContext $context
     ): bool {
-        $provided = $source->getProvidedFields();
-        $missing = $context->getMissingFields();
+        $provided = $source->getProvidedAttributes();
+        $missing = $context->getMissingAttributes();
 
         return count(array_diff($missing, $provided)) > 0;
     }

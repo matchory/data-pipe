@@ -97,7 +97,7 @@ class DebugPipelineCommand extends Command
             'Node',
             'Type',
             'Cost',
-            'Provides Fields',
+            'Provides Attributes',
             'Depends on',
         ]);
 
@@ -114,7 +114,7 @@ class DebugPipelineCommand extends Command
                     $node instanceof Collector ? 'Collector' : 'Transformer',
                     $node instanceof Collector ? $node->getCost() : '--',
                     $node instanceof Collector
-                        ? (implode(', ', $node->getProvidedFields()) ?: '--')
+                        ? (implode(', ', $node->getProvidedAttributes()) ?: '--')
                         : '--',
                     implode(', ', $node->getDependencies()) ?: '--',
                 ])

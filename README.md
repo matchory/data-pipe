@@ -29,9 +29,8 @@ Usage
 > **Note:** Before getting started with Data Pipe, you should familiarize
 > yourself with [its core concepts](#core-concepts).
 
-Data Pipe works by setting up pipelines with a pre-configured set of inter-dependent nodes. There are currently two types of nodes:
-[Data enriching nodes](#data-enriching-nodes) and
-[post-processing-nodes](#post-processing-nodes) (which are both variants of generic nodes).  
+Data Pipe works by setting up pipelines with a pre-configured set of inter-dependent nodes. There are currently two types of
+nodes: [Collector nodes](#collector-nodes) and [Transformer nodes](#transformer-nodes) (which are both variants of generic pipeline nodes).  
 Nodes take a payload object, modify and return it. Enriching nodes add new data, post-processing nodes transform existing values. This distinction might seem
 irrelevant, but it allows lots of runtime-optimizations.
 
@@ -66,7 +65,7 @@ class MyNode extends Node
 ### Proposing changes
 Note that you cannot directly update the payload: Every node receives just a clone of the actual payload. Instead, you can _propose_ a change to the payload.
 Data Pipe provides a simple algorithm for
-[best-fit change application](#best-fit-change-application). This allows to keep and compare multiple values for a single field.
+[best-fit change application](#best-fit-change-application). This allows to keep and compare multiple values for a single attribute.
 
 ### Creating pipelines
 Now that we have a node, let's create a pipeline to add it to:
@@ -115,17 +114,17 @@ pipeline runs, so you don't have to define an order manually. Every payload proc
 to suggest changes to the data.  
 There are two types of nodes currently:
 
-#### Data enriching nodes
-Nodes that enhance a record with additional information are _data enriching nodes_. These nodes may optionally define a _cost_: It is used to order those nodes
-by cost, and determine whether executing additional nodes is even necessary.  
+#### Collector nodes
+Nodes that enhance a record with additional information are called _collector nodes_. These nodes may optionally define a _cost_: It is used to order those
+nodes by cost, and determine whether executing additional nodes is even necessary.  
 Imagine you have two data sources -- your own, internal database, and an external system that charges per API call. The node for your database will have a lower
 cost than that or the external API. Now, if we're looking for a piece of information, we'll first execute the "cheaper" node (your internal database), then,
 _only if it can't satisfy our request_, we'll also execute the more expensive node.
 
 The more nodes you have, the more apparent the advantage of granular costs will be: Information will always be acquired with the cheapest means possible.
 
-#### Post-processing nodes
-Post-processing nodes allow you to refine, modify, or compare previously gathered information. This is different from data enriching nodes, as they're typically
+#### Transformer nodes
+Transformer nodes allow you to refine, modify, or compare previously gathered information. This is different from data enriching nodes, as they're typically
 executed _after_ those nodes.
 
 ### Best-Fit change application
@@ -142,7 +141,7 @@ Depending on a few rules, you're probably able to infer which is the closest var
 overriding each other's results, instead of setting an attribute on the payload, they can _suggest changes_ instead:
 
 ```php
-$context->proposeChange($this, 'field_name', 42);
+$context->proposeChange($this, 'attribute_name', 42);
 ```
 
 All nodes may propose changes to existing data, along with an optional _confidence score_: In the email case above, for example, we'd probably have a grey-list
