@@ -24,6 +24,18 @@ Install the library as a dependency using composer:
 php composer require matchory/data-pipe
 ```
 
+### Symfony Usage
+This package includes a Symfony integration. Please [read the instructions](./src/Integration/Symfony/README.md) to get started.  
+The integration will add fully automatic pipeline configuration to your app.
+
+### Laravel Usage
+This package includes an **incomplete** Laravel integration. Please [read the instructions](./src/Integration/Laravel/README.md) to get started.
+
+> **Note:**
+> We didn't implement Laravel support yet, because we don't currently need it. If you're interested in using `data-pipe` within a Laravel application, and would
+> like to have automatic pipeline configuration as with Symfony, please [open an issue](https://github.com/matchory/data-pipe/issues).
+
+
 Usage
 -----
 > **Note:** Before getting started with Data Pipe, you should familiarize
