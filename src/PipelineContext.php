@@ -198,6 +198,26 @@ final class PipelineContext
         // with a node scope before the application can propose changes.
         assert($this->node instanceof PipelineNodeInterface);
 
+        /** @var ProposedChangeInterface|null $existing */
+        $existing = $this->proposedChanges
+            ->find(fn(ProposedChangeInterface $change) => (
+                $change->getAttribute() === $attribute &&
+                $change->getNewValue() === $value
+            ));
+
+        // If we have another change proposal for the exact same value, increase
+        // its confidence to the average of both values, plus one (tiebreaker).
+        if ($existing) {
+            $confidence = (int)ceil(
+                ($confidence + $existing->getConfidence()) / 2 + 1
+            );
+
+            // Remove the existing item from the list
+            $this->proposedChanges = $this->proposedChanges->filter(
+                fn(ProposedChangeInterface $item) => $item !== $existing
+            );
+        }
+
         $this->proposedChanges = $this->proposedChanges->add(new ProposedChange(
             $this->node,
             $attribute,
